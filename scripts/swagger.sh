@@ -18,9 +18,11 @@ function clean
   fi
 }
 
+
 function main
 {
   # Each argument
+  counter=$((1))
   for d in $1; do
     if [ -d "$d" ]; then
       #( printf "${GREEN}Entering ${BLUE}$d${NC}\n" )
@@ -59,11 +61,13 @@ function main
             mkdir -p $build_dir
             printf "${GREEN}Temp Dir${BLUE} $build_dir${NC}\n"
 
-            # Run bootprint swagger-ui
-            #bootprint openapi "$f" "$build_dir"
-
             # Use npm cmd to avoid npm global packages
-            node ./node_modules/bootprint/bin/bootprint.js openapi "$f" "$build_dir"
+            counter=$(($counter+1))
+            ./node_modules/bootprint/bin/bootprint.js openapi "$f" "$build_dir" &
+            if [ $(( $counter % 10)) == 0 ]
+            then
+              wait
+            fi
 
             printf "${GREEN}Created html ${BLUE} $build_dir${NC}\n"
 
@@ -72,16 +76,14 @@ function main
       done
     fi
   done
+
+  wait
 }
 
 function clean
 {
   rm -rf $BUILD_DIR
 }
-
-#
-#
-#
 
 INPUT_FOLDER=$1
 OUTPUT_FOLDER=$2
